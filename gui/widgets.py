@@ -2,6 +2,7 @@ import customtkinter as ctk
 import os
 import psutil
 import threading
+import time
 
 class Header(ctk.CTkFrame):
         def __init__(self, master, **kwargs):
@@ -98,6 +99,10 @@ class LinkItem(ctk.CTkFrame):
         self.interval_menu.configure(state="disabled")
         self.start_btn.grid_forget()
         self.stop_btn.grid(column=4, row=0, padx=3)
+        time.sleep(5)
+        self.set_stop()
+        time.sleep(5)
+        self.set_running()
 
     def delete_link(self):
         to_delete = "@!@!@".join([self.link_text.get(), self.interval_variable.get()])
@@ -147,7 +152,7 @@ class LinksContainer(ctk.CTkFrame):
         self.init_links()
     
     def add_link(self):
-        content = ["", "30 secs"]
+        content = ["", "30 mins"]
         link_item = LinkItem(self.container_body, content[0], content[1])
         link_item.grid(pady=3)
         
@@ -160,9 +165,6 @@ class LinksContainer(ctk.CTkFrame):
             for i in items:
                 link_item = LinkItem(self.container_body, i[0], i[1].rstrip())
                 link_item.grid(pady=3)
-            # for item in self.container_body.winfo_children():
-            #     item.set_running()
-            #     time.sleep(10)
 
 class GetBrowserWindow(ctk.CTkToplevel):
     def __init__(self, master, **kwargs):
