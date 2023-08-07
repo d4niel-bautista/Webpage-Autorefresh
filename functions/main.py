@@ -60,7 +60,19 @@ def start(link, interval, obj):
         driver.get(link)
         if (driver.current_url != link):
             time.sleep(3)
-            driver.get(link)
+            try:
+                with open("creds.txt") as f:
+                    creds = [i.rstrip() for i in f.readlines()]
+                id = driver.find_element("xpath", "/html/body/form/table/tbody/tr[2]/td/table/tbody/tr/td/table/tbody/tr[1]/td[2]/input")
+                id.send_keys(creds[0])
+                pwd = driver.find_element("xpath", "/html/body/form/table/tbody/tr[2]/td/table/tbody/tr/td/table/tbody/tr[2]/td[2]/input")
+                pwd.send_keys(creds[1])
+                login = driver.find_element("xpath", "/html/body/form/table/tbody/tr[2]/td/table/tbody/tr/td/table/tbody/tr[1]/td[3]/input")
+                login.click()
+                driver.get(link)
+            except Exception as e:
+                print(e)
+                driver.get(link)
             obj.process_id = driver.service.process.pid
         while True:
             time.sleep(interval)

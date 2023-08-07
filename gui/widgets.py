@@ -2,7 +2,6 @@ import customtkinter as ctk
 import os
 import psutil
 import threading
-import time
 
 class Header(ctk.CTkFrame):
         def __init__(self, master, **kwargs):
@@ -130,110 +129,110 @@ class LinkItem(ctk.CTkFrame):
                 write.writelines(link + "\n" for link in links)
         self.prev_int_var = interval
 
-
 class LinksContainer(ctk.CTkFrame):
-        def __init__(self, master, **kwargs):
-            super().__init__(master, **kwargs)
-            self.grid_propagate(False)
-            self.grid_columnconfigure((0), weight=1)
-            self.grid_rowconfigure((500), weight=1)
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.grid_propagate(False)
+        self.grid_columnconfigure((0), weight=1)
+        self.grid_rowconfigure((500), weight=1)
 
-            self.container_body = ctk.CTkScrollableFrame(self, width=500, height=330)
-            self.container_body.propagate(False)
-            self.container_body.grid_columnconfigure((0), weight=1)
-            self.container_body.grid(column=0, pady=10)
+        self.container_body = ctk.CTkScrollableFrame(self, width=500, height=330)
+        self.container_body.propagate(False)
+        self.container_body.grid_columnconfigure((0), weight=1)
+        self.container_body.grid(column=0, pady=10)
 
-            self.add_btn = ctk.CTkButton(self, text="Add New Link", width=120, command=self.add_link)
-            self.add_btn.grid(sticky='s', pady=7, row=500)
-            
-            self.init_links()
+        self.add_btn = ctk.CTkButton(self, text="Add New Link", width=120, command=self.add_link)
+        self.add_btn.grid(sticky='s', pady=7, row=500)
         
-        def add_link(self):
-            content = ["", "30 secs"]
-            link_item = LinkItem(self.container_body, content[0], content[1])
-            link_item.grid(pady=3)
-            
-            with open("links.txt", "a+") as f:
-                f.write("@!@!@".join(content) + "\n")
+        self.init_links()
+    
+    def add_link(self):
+        content = ["", "30 secs"]
+        link_item = LinkItem(self.container_body, content[0], content[1])
+        link_item.grid(pady=3)
         
-        def init_links(self):
-            with open("links.txt", "r") as f:
-                items = [line.split(sep="@!@!@") for line in f.readlines()]
-                for i in items:
-                    link_item = LinkItem(self.container_body, i[0], i[1].rstrip())
-                    link_item.grid(pady=3)
-                # for item in self.container_body.winfo_children():
-                #     item.set_running()
-                #     time.sleep(10)
+        with open("links.txt", "a+") as f:
+            f.write("@!@!@".join(content) + "\n")
+    
+    def init_links(self):
+        with open("links.txt", "r+") as f:
+            items = [line.split(sep="@!@!@") for line in f.readlines()]
+            for i in items:
+                link_item = LinkItem(self.container_body, i[0], i[1].rstrip())
+                link_item.grid(pady=3)
+            # for item in self.container_body.winfo_children():
+            #     item.set_running()
+            #     time.sleep(10)
 
 class GetBrowserWindow(ctk.CTkToplevel):
-        def __init__(self, master, **kwargs):
-            super().__init__(master, **kwargs)
-            self.title("Set Browser")
-            self.screen_width = self.winfo_screenwidth()
-            self.screen_height = self.winfo_screenheight()
-            self.window_width = 300
-            self.window_height = 150
-            self.x_coordinate = int((self.screen_width/2) - (self.window_width/2))
-            self.y_coordinate = int((self.screen_height/2) - (self.window_height/1.9))
-            self.geometry(f"{self.window_width}x{self.window_height}+{self.x_coordinate}+{self.y_coordinate}")
-            self.grab_set()
-            self.grid_columnconfigure(0, weight=1)
-            self.grid_rowconfigure(0, weight=1)
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.title("Set Browser")
+        self.screen_width = self.winfo_screenwidth()
+        self.screen_height = self.winfo_screenheight()
+        self.window_width = 300
+        self.window_height = 150
+        self.x_coordinate = int((self.screen_width/2) - (self.window_width/2))
+        self.y_coordinate = int((self.screen_height/2) - (self.window_height/1.9))
+        self.geometry(f"{self.window_width}x{self.window_height}+{self.x_coordinate}+{self.y_coordinate}")
+        self.grab_set()
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
-            self.bg_frame = ctk.CTkFrame(self, width=250, height=120)
-            self.bg_frame.grid_propagate(False)
-            self.bg_frame.grid_columnconfigure((0,3), weight=1)
-            self.bg_frame.grid_rowconfigure((0,4), weight=1)
-            self.bg_frame.grid()
+        self.bg_frame = ctk.CTkFrame(self, width=250, height=120)
+        self.bg_frame.grid_propagate(False)
+        self.bg_frame.grid_columnconfigure((0,3), weight=1)
+        self.bg_frame.grid_rowconfigure((0,4), weight=1)
+        self.bg_frame.grid()
 
-            self.label = ctk.CTkLabel(self.bg_frame, text="Set your browser:")
-            self.label.grid(columnspan=2, column=1, row=1, padx=3, pady=2)
+        self.label = ctk.CTkLabel(self.bg_frame, text="Set your browser:")
+        self.label.grid(columnspan=2, column=1, row=1, padx=3, pady=2)
 
-            self.browser_var = ctk.StringVar()
-            self.browser_exes = {"Chrome":"chrome.exe", 
-                             "Brave":"brave.exe", 
-                             "Edge":"msedge.exe", 
-                             "Firefox":"firefox.exe"}
-            self.browsers = list(self.browser_exes.keys())
-            self.browser_menu = ctk.CTkOptionMenu(self.bg_frame, values=self.browsers, variable=self.browser_var, width=90)
-            self.browser_menu.grid(column = 1, row=2, padx=4, pady=2)
-            self.browser_var.set("Chrome")
+        self.browser_var = ctk.StringVar()
+        self.browser_exes = {"Chrome":"chrome.exe", 
+                            "Brave":"brave.exe", 
+                            "Edge":"msedge.exe", 
+                            "Firefox":"firefox.exe"}
+        self.browsers = list(self.browser_exes.keys())
+        self.browser_menu = ctk.CTkOptionMenu(self.bg_frame, values=self.browsers, variable=self.browser_var, width=90)
+        self.browser_menu.grid(column = 1, row=2, padx=4, pady=2)
+        self.browser_var.set("Edge")
 
-            self.find_btn = ctk.CTkButton(self.bg_frame, text="Find", width=45, command=self.set_browser)
-            self.find_btn.grid(column = 2, row=2, padx=4, pady=2)
+        self.find_btn = ctk.CTkButton(self.bg_frame, text="Find", width=45, command=self.set_browser)
+        self.find_btn.grid(column = 2, row=2, padx=4, pady=2)
 
-            self.status_label = ctk.CTkLabel(self.bg_frame, text="")
-            self.text_color = self.status_label.cget("text_color")
-            self.status_label.grid(column = 1, columnspan=2, padx=4, pady=5)
-        
-        def set_browser(self):
-            browser = self.browser_exes[self.browser_var.get()]
-            tmp = self.find_files(browser, 'C:\\Program Files')
+        self.status_label = ctk.CTkLabel(self.bg_frame, text="")
+        self.text_color = self.status_label.cget("text_color")
+        self.status_label.grid(column = 1, columnspan=2, padx=4, pady=5)
+    
+    def set_browser(self):
+        browser = self.browser_exes[self.browser_var.get()]
+        tmp = self.find_files(browser, 'C:\\Program Files')
+        if os.path.isfile(tmp):
+            with open("browser_path.txt", 'w+') as browser_tmp:
+                browser_tmp.write(tmp)
+                self.status_label.configure(text=browser + " found!", text_color=self.text_color)
+        else:
+            tmp = self.find_files(browser, 'C:\\Program Files (x86)')
             if os.path.isfile(tmp):
                 with open("browser_path.txt", 'w+') as browser_tmp:
                     browser_tmp.write(tmp)
                     self.status_label.configure(text=browser + " found!", text_color=self.text_color)
+                    functions.main.browser = tmp.split("\\")[-1]
             else:
-                tmp = self.find_files(browser, 'C:\\Program Files (x86)')
-                if os.path.isfile(tmp):
-                    with open("browser_path.txt", 'w+') as browser_tmp:
-                        browser_tmp.write(tmp)
-                        self.status_label.configure(text=browser + " found!", text_color=self.text_color)
-                else:
-                    with open("browser_path.txt", 'w+') as browser_tmp:
-                        browser_tmp.write("")
-                    self.status_label.configure(text=browser + " not found!\nTry with other browsers.", text_color="red")
-        
-        @staticmethod
-        def find_files(filename, search_path):
-            result = ''
-            for root, dir, files in os.walk(search_path):
-                if filename in files:
-                    temp = os.path.join(root, filename)
-                    if filename in temp.split('\\')[-1]:
-                        result = temp
-            return result
+                with open("browser_path.txt", 'w+') as browser_tmp:
+                    browser_tmp.write("")
+                self.status_label.configure(text=browser + " not found!\nTry with other browsers.", text_color="red")
+    
+    @staticmethod
+    def find_files(filename, search_path):
+        result = ''
+        for root, dir, files in os.walk(search_path):
+            if filename in files:
+                temp = os.path.join(root, filename)
+                if filename in temp.split('\\')[-1]:
+                    result = temp
+        return result
 
 import functions.main
                      
