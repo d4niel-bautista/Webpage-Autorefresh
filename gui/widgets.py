@@ -3,22 +3,24 @@ import os
 import psutil
 import threading
 import time
+from functions.main import RefreshBotInstance
 
 class Header(ctk.CTkFrame):
-        def __init__(self, master, **kwargs):
-            super().__init__(master, **kwargs)
-            self.grid_propagate(False)
-            self.grid_columnconfigure(0, weight=1)
-            
-            self.title = ctk.CTkLabel(self, text="Webpage Autorefresh", text_color="white", font=ctk.CTkFont(family="Roboto", size=40), anchor="center")
-            self.title.grid(pady=20)
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.grid_propagate(False)
+        self.grid_columnconfigure(0, weight=1)
+        
+        self.title = ctk.CTkLabel(self, text="Webpage Autorefresh", text_color="white", font=ctk.CTkFont(family="Roboto", size=40), anchor="center")
+        self.title.grid(pady=20)
 
-            self.description = ctk.CTkLabel(self, text="Input a link and set the interval timer", text_color="white", font=ctk.CTkFont(family="Arial", size=24), anchor="center")
-            self.description.grid()
+        self.description = ctk.CTkLabel(self, text="Input a link and set the interval timer", text_color="white", font=ctk.CTkFont(family="Arial", size=24), anchor="center")
+        self.description.grid()
 
 class LinkItem(ctk.CTkFrame):
-    def __init__(self, master, link, interval, height=45, width=480, **kwargs):
+    def __init__(self, master, link, interval, height=45, width=480, bot=None, **kwargs):
         super().__init__(master, height=height, width=width, **kwargs)
+        self.bot = bot
         self.grid_propagate(False)
         self.grid_columnconfigure((0,5), weight=1)
         self.grid_rowconfigure((0), weight=1)
@@ -68,13 +70,17 @@ class LinkItem(ctk.CTkFrame):
         self.timer_value = value
     
     def set_running(self):
+        if self.bot.running:
+            return
         def start(self):
             self.configure(fg_color="green")
             self.start_btn.grid_forget()
+            self.start_btn.configure(state='disabled')
             self.stop_btn.grid(column=4, row=0, padx=3)
             self.link_text.configure(state="readonly")
             self.interval_menu.configure(state="disabled")
-            functions.main.start(self.link_text.get(), self.timer_value, self)
+            self.bot.start(link=self.link_text.get(), interval=self.timer_value, obj=self)
+        
         thread = threading.Thread(target=lambda x=self:start(x), daemon=True)
         thread.start()
     
@@ -88,6 +94,7 @@ class LinkItem(ctk.CTkFrame):
                     parent.kill()
             except Exception as e:
                 print(e)
+            self.bot.set_stop = True
             self.configure(fg_color=self.default_color)
             self.stop_btn.grid_forget()
             self.start_btn.grid(column=4, row=0, padx=3)
@@ -98,15 +105,19 @@ class LinkItem(ctk.CTkFrame):
         thread.start()
     
     def error_stop(self):
-        self.configure(fg_color="red")
-        self.link_text.configure(state="readonly")
-        self.interval_menu.configure(state="disabled")
-        self.start_btn.grid_forget()
-        self.stop_btn.grid(column=4, row=0, padx=3)
-        time.sleep(5)
+        if not self.bot.set_stop:
+            self.configure(fg_color="red")
+            self.link_text.configure(state="readonly")
+            self.interval_menu.configure(state="disabled")
+            self.start_btn.grid_forget()
+            self.stop_btn.grid(column=4, row=0, padx=3)
+            time.sleep(5)
+        
         self.set_stop()
-        time.sleep(5)
-        self.set_running()
+
+        if not self.bot.set_stop:
+            time.sleep(5)
+            self.set_running()
 
     def delete_link(self):
         to_delete = "@!@!@".join([self.link_text.get(), self.interval_variable.get()])
@@ -157,7 +168,8 @@ class LinksContainer(ctk.CTkFrame):
     
     def add_link(self):
         content = ["", "30 mins"]
-        link_item = LinkItem(self.container_body, content[0], content[1])
+        bot = RefreshBotInstance()
+        link_item = LinkItem(self.container_body, content[0], content[1], bot=bot)
         link_item.grid(pady=3)
         
         with open("links.txt", "a+") as f:
@@ -167,7 +179,8 @@ class LinksContainer(ctk.CTkFrame):
         with open("links.txt", "r+") as f:
             items = [line.split(sep="@!@!@") for line in f.readlines()]
             for i in items:
-                link_item = LinkItem(self.container_body, i[0], i[1].rstrip())
+                bot = RefreshBotInstance()
+                link_item = LinkItem(self.container_body, i[0], i[1].rstrip(), bot=bot)
                 link_item.grid(pady=3)
 
 class GetBrowserWindow(ctk.CTkToplevel):
