@@ -80,16 +80,20 @@ class LinkItem(ctk.CTkFrame):
     
     def set_stop(self):
         def stop(self):
+            try:
+                if (self.process_id != 0):
+                    parent = psutil.Process(self.process_id)
+                    for child in parent.children(recursive=True):
+                        child.kill()
+                    parent.kill()
+            except Exception as e:
+                print(e)
             self.configure(fg_color=self.default_color)
             self.stop_btn.grid_forget()
             self.start_btn.grid(column=4, row=0, padx=3)
             self.link_text.configure(state="normal")
             self.interval_menu.configure(state="normal")
-            if (self.process_id != 0):
-                parent = psutil.Process(self.process_id)
-                for child in parent.children(recursive=True):
-                    child.kill()
-                parent.kill()
+
         thread = threading.Thread(target=lambda x=self:stop(x), daemon=True)
         thread.start()
     

@@ -1,4 +1,63 @@
 import time
+from selenium import webdriver
+
+class RefreshBotInstance():
+    def __init__(self, link, interval, obj):
+        self.obj = obj
+        self.set_stop = False
+        self.browser = self.get_browser()
+        self.set_driver()
+    
+    def set_service(self):
+        with open("browser_path.txt", "r") as f:
+            browser = f.readline().split("\\")[-1]
+            return browser
+    
+    def set_service(self):
+        if self.browser == "chrome.exe":
+            from selenium.webdriver.chrome.service import Service as ChromeService
+            from webdriver_manager.chrome import ChromeDriverManager
+
+            option = webdriver.ChromeOptions()
+            option.add_experimental_option("excludeSwitches", ["enable-logging"])
+            self.service = ChromeService(ChromeDriverManager.install())
+            self.option = option
+        elif self.browser == "msedge.exe":    
+            from selenium.webdriver.edge.service import Service as EdgeService
+            from webdriver_manager.microsoft import EdgeChromiumDriverManager
+
+            option = webdriver.EdgeOptions()
+            option.add_experimental_option("excludeSwitches", ["enable-logging"])
+            self.service = EdgeService(EdgeChromiumDriverManager().install())
+            self.option = option
+        elif self.browser == "brave.exe":
+            from selenium.webdriver.chrome.service import Service as BraveService
+            from webdriver_manager.chrome import ChromeDriverManager
+
+            option = webdriver.ChromeOptions()
+            option.add_experimental_option("excludeSwitches", ["enable-logging"])
+            self.service = BraveService(ChromeDriverManager().install())
+            self.option = option
+        elif self.browser == "firefox.exe":
+            from selenium.webdriver.firefox.service import Service as FirefoxService
+            from webdriver_manager.firefox import GeckoDriverManager
+
+            option = webdriver.FirefoxOptions()
+            option.add_experimental_option("excludeSwitches", ["enable-logging"])
+            self.service = FirefoxService(GeckoDriverManager().install())
+            self.option = option
+    
+    def instantiate_driver(self):
+        if self.browser == "chrome.exe":
+            driver = webdriver.Chrome(service=self.service, options=self.option)
+        elif self.browser == "msedge.exe": 
+            driver = webdriver.Edge(service=self.service, options=self.option)
+        elif self.browser == "brave.exe":
+            driver = webdriver.Chrome(service=self.service, options=self.option)
+        elif self.browser == "firefox.exe":
+            driver = webdriver.Firefox(service=self.service, options=self.option)
+        return driver
+
 
 if __name__ == "__main__":
     with open("../browser_path.txt", "r") as f:
@@ -77,7 +136,7 @@ def start(link, interval, obj):
         while True:
             time.sleep(interval)
             driver.refresh()
-    except BaseException as e:
+    except Exception as e:
         print(e)
         driver.quit()
         obj.error_stop()
