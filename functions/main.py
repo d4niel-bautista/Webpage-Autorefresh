@@ -60,10 +60,11 @@ class RefreshBotInstance():
         return driver
 
     def start(self, link, interval, obj):
-        self.running = True
-        self.set_stop = False
-        driver = self.instantiate_driver()
         try:
+            self.running = True
+            self.set_stop = False
+            driver = self.instantiate_driver()
+        
             driver.get(link)
             if (driver.current_url != link):
                 time.sleep(3)
