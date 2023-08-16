@@ -1,5 +1,6 @@
 import time
 from selenium import webdriver
+from datetime import datetime
 
 class RefreshBotInstance():
     def __init__(self):
@@ -83,6 +84,10 @@ class RefreshBotInstance():
             while not self.set_stop:
                 time.sleep(interval)
                 driver.refresh()
+                now = datetime.now()
+                dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+                with open('logs.txt', 'a+') as f:
+                    f.write('RELOADED AT ' + dt_string + '\n' + link + " @" + str(interval) + " seconds" + '\n\n')
             try:
                 driver.quit()
                 obj.set_stop()
